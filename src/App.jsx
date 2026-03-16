@@ -1010,43 +1010,6 @@ export default function BaseballPomodoro() {
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap');
         *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
         body { background:${T.wallBg}; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family:'Barlow',sans-serif; }
-        /* ── Mobile full-screen override ── */
-        @media (max-width: 480px) {
-          body { background:${mode==="work" ? T.scrollBg : T.scrollBgBreak}; min-height:100dvh; align-items:stretch; }
-          .app-outer { display:block !important; min-height:100dvh !important; padding:0 !important; }
-          .phone { width:100% !important; height:100dvh !important; border-radius:0 !important; box-shadow:none !important; }
-          .phone::before, .phone::after { display:none !important; }
-          .notch { display:none !important; }
-          .status { display:none !important; }
-          .scroll {
-            overflow:hidden !important;
-            display:flex !important;
-            flex-direction:column !important;
-            height:100% !important;
-            padding: env(safe-area-inset-top, 16px) 20px 0 20px;
-          }
-          .navbar { padding:6px 0 8px; flex:0 0 auto; }
-          .stat-card-wrap { padding:10px 8px 8px; margin-bottom:8px; flex:0 0 auto; }
-          .stat-date { margin-bottom:6px; }
-          .stat-col-val { font-size:26px !important; }
-          .ticker-wrap { margin-bottom:8px; flex:0 0 auto; }
-          .mode-tabs { margin-bottom:6px; flex:0 0 auto; }
-          .hr-banner-wrap { height:26px !important; flex:0 0 26px; }
-          .hr-banner { font-size:16px !important; }
-          .timer-wrap { flex:1 1 0 !important; min-height:0 !important; padding:0 !important; justify-content:center !important; overflow:hidden; }
-          .live-bar { min-height:16px !important; margin-bottom:4px !important; }
-          .timer-ring { width:200px !important; height:200px !important; flex-shrink:0; }
-          .timer-ring svg { width:200px !important; height:200px !important; }
-          .timer-inner { width:200px !important; height:200px !important; }
-          .timer-digits { font-size:68px !important; }
-          .floating-chip-wrap { border-radius:0 !important; }
-          .stat-announce { display:none !important; }
-          .btn-stack { flex:0 0 auto; padding:8px 0 max(env(safe-area-inset-bottom, 20px), 20px) !important; gap:8px; }
-          .btn-primary { min-height:50px !important; }
-          .btn-reset { min-height:40px !important; }
-          .settings-backdrop { border-radius:0 !important; }
-          .settings-panel { border-radius:0 44px 44px 0 !important; }
-        }
 
         /* ── Phone ── */
         .phone { width:375px; height:812px; border-radius:44px; box-shadow: 0 0 0 2px ${T.phoneRing}, 0 0 0 7px #111, 0 40px 100px rgba(0,0,0,0.55); position:relative; overflow:hidden; display:flex; flex-direction:column; transition:background 0.5s ease; }
@@ -1191,6 +1154,44 @@ export default function BaseballPomodoro() {
         .settings-coming-soon { display:flex; align-items:center; justify-content:space-between; padding:10px 4px; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600; color:${T.comingSoonColor}; letter-spacing:0.04em; }
         .settings-badge { font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; background:${T.badgeBg}; color:${T.badgeColor}; padding:3px 8px; border-radius:6px; }
         .settings-badge-soon { font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; background:${T.badgeSoonBg}; color:${T.badgeSoonColor}; padding:3px 8px; border-radius:6px; }
+
+        /* ── Mobile full-screen override ── */
+        @media (max-width: 480px) {
+          body { background:${mode==="work" ? T.scrollBg : T.scrollBgBreak}; min-height:100dvh; align-items:stretch; }
+          .app-outer { display:block !important; min-height:100dvh !important; padding:0 !important; background:${mode==="work" ? T.scrollBg : T.scrollBgBreak} !important; }
+          .phone { width:100% !important; height:100dvh !important; border-radius:0 !important; box-shadow:none !important; }
+          .phone::before, .phone::after { display:none !important; }
+          .notch { display:none !important; }
+          .status { display:none !important; }
+          .scroll {
+            overflow:hidden !important;
+            display:flex !important;
+            flex-direction:column !important;
+            height:100% !important;
+            padding: env(safe-area-inset-top, 16px) 24px 0 24px !important;
+          }
+          .navbar { padding:8px 0 10px; flex:0 0 auto; }
+          .stat-card-wrap { padding:12px 12px 10px; margin-bottom:10px; flex:0 0 auto; width:100%; }
+          .stat-date { margin-bottom:8px; }
+          .stat-col-val { font-size:28px !important; }
+          .ticker-wrap { margin-bottom:10px; flex:0 0 auto; }
+          .mode-tabs { margin-bottom:8px; flex:0 0 auto; width:100%; }
+          .hr-banner-wrap { height:26px !important; flex:0 0 26px; }
+          .hr-banner { font-size:16px !important; }
+          .timer-wrap { flex:1 1 0 !important; min-height:0 !important; padding:0 !important; justify-content:center !important; overflow:hidden; width:100%; }
+          .live-bar { min-height:18px !important; margin-bottom:6px !important; }
+          .timer-ring { width:240px !important; height:240px !important; flex-shrink:0; }
+          .timer-ring svg { width:240px !important; height:240px !important; }
+          .timer-inner { width:240px !important; height:240px !important; }
+          .timer-digits { font-size:80px !important; }
+          .floating-chip-wrap { border-radius:0 !important; }
+          .stat-announce { display:none !important; }
+          .btn-stack { flex:0 0 auto; padding:10px 0 max(env(safe-area-inset-bottom, 24px), 24px) !important; gap:10px; width:100%; }
+          .btn-primary { min-height:54px !important; width:100% !important; }
+          .btn-reset { min-height:44px !important; width:100% !important; }
+          .settings-backdrop { border-radius:0 !important; }
+          .settings-panel { border-radius:0 44px 44px 0 !important; }
+        }
 
         /* ── Keyframes ── */
         @keyframes confettiFall { 0% { transform:translateY(0) rotate(0deg); opacity:1; } 100% { transform:translateY(950px) rotate(720deg); opacity:0; } }
