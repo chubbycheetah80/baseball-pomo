@@ -1013,6 +1013,7 @@ export default function BaseballPomodoro() {
         /* ── Mobile full-screen override ── */
         @media (max-width: 480px) {
           body { background:${mode==="work" ? T.scrollBg : T.scrollBgBreak}; min-height:100dvh; align-items:stretch; }
+          .app-outer { display:block !important; min-height:100dvh !important; padding:0 !important; }
           .phone { width:100% !important; height:100dvh !important; border-radius:0 !important; box-shadow:none !important; }
           .phone::before, .phone::after { display:none !important; }
           .notch { display:none !important; }
@@ -1202,7 +1203,7 @@ export default function BaseballPomodoro() {
         @keyframes breakPulse { 0%,100% { opacity:0.5; } 50% { opacity:1; } }
       `}</style>
 
-      <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh",background:T.wallBg}}>
+      <div className="app-outer" style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh",background:T.wallBg}}>
         <div className="phone" role="main" aria-label="Ballpark Focus Pomodoro Timer" style={{background: mode==="work" ? T.scrollBg : T.scrollBgBreak, transition:"background 0.5s ease"}}>
           <Confetti active={confetti} />
           <div className="notch" aria-hidden="true" />
