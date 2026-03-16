@@ -1241,7 +1241,7 @@ export default function BaseballPomodoro() {
       `}</style>
 
       <div className="app-outer" style={isMobile ? {display:"block",width:"100%",minHeight:"100dvh",background:mode==="work"?T.scrollBg:T.scrollBgBreak} : {display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh",background:T.wallBg}}>
-        <div className="phone" role="main" aria-label="Ballpark Focus Pomodoro Timer" style={isMobile ? {width:"100%",height:"100dvh",borderRadius:0,boxShadow:"none",background:mode==="work"?T.scrollBg:T.scrollBgBreak,transition:"background 0.5s ease"} : {background:mode==="work"?T.scrollBg:T.scrollBgBreak,transition:"background 0.5s ease"}}>
+        <div className="phone" role="main" aria-label="Ballpark Focus Pomodoro Timer" style={isMobile ? {width:"100%",height:"100dvh",maxHeight:"100dvh",overflow:"hidden",display:"flex",flexDirection:"column",borderRadius:0,boxShadow:"none",background:mode==="work"?T.scrollBg:T.scrollBgBreak,transition:"background 0.5s ease"} : {background:mode==="work"?T.scrollBg:T.scrollBgBreak,transition:"background 0.5s ease"}}>
           <Confetti active={confetti} />
           <div className="notch" aria-hidden="true" />
 
@@ -1301,11 +1301,8 @@ export default function BaseballPomodoro() {
             </div>
           </div>
 
-          <div className="scroll" style={isMobile ? {padding:"env(safe-area-inset-top, 16px) 24px 0 24px", overflow:"hidden", display:"flex", flexDirection:"column", height:"100%"} : {}}>
-            {/* DEBUG — remove after testing */}
-            <div style={{background:"red",color:"white",fontSize:"11px",padding:"2px 6px",position:"fixed",top:0,right:0,zIndex:9999}}>
-              w={typeof window!=="undefined"?window.innerWidth:"?"} mobile={String(isMobile)}
-            </div>
+          <div className="scroll" style={isMobile ? {padding:"env(safe-area-inset-top, 16px) 24px 0 24px", overflow:"hidden", display:"flex", flexDirection:"column", flex:"1 1 0", minHeight:0} : {}}>
+
 
             {/* Navbar */}
             <div className="navbar">
