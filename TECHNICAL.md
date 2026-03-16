@@ -2,29 +2,29 @@
 
 ## Architecture Overview
 
-The entire application is a single React component file (`baseball-pomodoro.jsx`). There is no build pipeline, no external state library, no CSS framework, and no audio assets. Everything is self-contained.
+The entire application is a single React component file (`src/App.jsx`). There is no build pipeline complexity, no external state library, no CSS framework, and no audio assets. Everything is self-contained.
 
-### File Structure (within the single file)
+### File Structure (within App.jsx)
 
 ```
-Constants & Theme Tokens       Lines ~4–263
-  THEMES object                All three theme token maps
+Constants & Theme Tokens       
+  THEMES object                All three theme token maps (~70 tokens each)
   STATS array                  Hit type definitions and weights
   HR_CALLS / HIT_CALLS         Flavor text per hit type
 
-Pure Functions                 Lines ~279–288
+Pure Functions                 
   getRandomStat()              Weighted random hit selection
   getCall()                    Random flavor text for a hit key
   fmt()                        Seconds → "MM:SS" string
 
-Sub-Components                 Lines ~290–558
+Sub-Components                 
   Confetti                     60-piece CSS animation confetti
   PlayerName                   Inline editable name with input toggle
   Ticker                       Collapsible play-by-play log
   DurationStepper              +/− minute stepper for settings
   SettingsPanel                Full slide-up settings drawer
 
-Main Component                 Lines ~561–1283
+Main Component                 
   BaseballPomodoro             State, effects, audio engine, UI
 ```
 
@@ -32,19 +32,19 @@ Main Component                 Lines ~561–1283
 
 ## Theme System
 
-Themes are plain objects stored in a `THEMES` constant. Each theme contains ~70 named design tokens covering every color used in the app. The active theme is selected by `themeKey` state and aliased as `T`:
+Themes are plain objects stored in a `THEMES` constant. Each theme contains ~70 named design tokens. The active theme is aliased as `T`:
 
 ```js
 const T = THEMES[themeKey] || THEMES.dayGame;
 ```
 
-All CSS is injected via a `<style>` tag inside the component render, using template literals with `T.tokenName` references. This means the entire visual appearance re-renders when the theme changes — there is no class-swapping or CSS variable system.
+All CSS is injected via a `<style>` tag inside the component render, using template literals with `T.tokenName` references. The entire visual appearance re-renders when the theme changes.
 
 ### Token Categories
 
 | Prefix | Purpose |
 |---|---|
-| `phoneBg`, `phoneRing`, `wallBg` | Phone frame and background |
+| `phoneBg`, `phoneRing`, `wallBg` | Phone frame and desktop background |
 | `scrollBg`, `scrollBgBreak` | Main content area per mode |
 | `settingsBg` | Settings panel background |
 | `navbar*` | Name, icon colors |
@@ -56,101 +56,126 @@ All CSS is injected via a `<style>` tag inside the component render, using templ
 | `stepper*` | Duration stepper controls |
 | `lifetime*` | Career stats section |
 | `toggle*`, `badge*` | Settings toggles and badges |
-| `reset*`, `resetConfirm*` | Career stats reset button states |
+| `reset*` | Career stats reset button |
 | `chipBg`, `chipHRBg` | Floating hit chip colors |
-| `soundIconColor` | Sound toggle icon (separate from navbarIcon) |
-
-### Adding a New Theme
-
-1. Copy an existing theme object in `THEMES`
-2. Give it a new key and `name`
-3. Update every token — all ~70 values
-4. Add it to the theme selector array in `SettingsPanel`
-5. Audit all colors for WCAG AA contrast (4.5:1 minimum)
+| `soundIconColor` | Sound toggle icon |
+| `cardDate` | Scorecard date label (distinct accent per theme) |
 
 ---
 
 ## State Reference
 
-All state lives in `BaseballPomodoro`. No context, no external store.
-
 | State | Type | Purpose |
 |---|---|---|
-| `workMins` | number | Focus session duration in minutes |
-| `breakMins` | number | Break session duration in minutes |
+| `workMins` | number | Focus session duration |
+| `breakMins` | number | Break session duration |
 | `themeKey` | string | Active theme key |
-| `mode` | `"work"` \| `"break"` | Current timer mode |
+| `isMobile` | boolean | True when viewport ≤ 500px |
+| `mode` | "work" \| "break" | Current timer mode |
 | `timeLeft` | number | Seconds remaining |
-| `running` | boolean | Timer is counting down |
+| `running` | boolean | Timer counting down |
 | `atBats` | number | Today's completed sessions |
 | `stats` | object | Today's hit counts per type |
 | `lastStat` | object\|null | Most recently awarded hit |
 | `confetti` | boolean | HR confetti active |
-| `call` | string | Flavor text (unused in UI currently) |
-| `log` | array | In-memory play-by-play log (up to 50) |
+| `log` | array | In-memory play-by-play (up to 50) |
 | `playerName` | string | Display name |
 | `settingsOpen` | boolean | Settings panel visibility |
 | `lifetime` | object | Career stats `{ focusSecs, hits }` |
 | `floatingChips` | array | Active floating chip animations |
+| `activeBanner` | object\|null | Currently showing banner `{ text }` |
 | `soundOn` | boolean | Sound effects enabled |
+| `showSplash` | boolean | Splash screen visible |
+| `splashFading` | boolean | Splash screen fading out |
 
 ### Refs
 
 | Ref | Purpose |
 |---|---|
-| `intervalRef` | `setInterval` handle for the 1-second tick |
-| `animTimerRef` | Unused holdover — safe to remove in cleanup |
-| `arcRef` | Direct DOM reference to the SVG arc element |
-| `rafRef` | `requestAnimationFrame` handle |
-| `audioCtxRef` | Shared `AudioContext` instance |
-| `arcStartRef` | Unused — safe to remove in cleanup |
+| `intervalRef` | setInterval handle for 1-second tick |
+| `arcRef` | Direct DOM reference to SVG arc element |
+| `rafRef` | requestAnimationFrame handle |
+| `audioCtxRef` | Shared AudioContext instance |
+| `bannerQueueRef` | Queue of pending banner messages |
+| `bannerTimerRef` | setTimeout handle for banner sequencing |
+
+---
+
+## Mobile Layout System
+
+The app uses an `isMobile` boolean state (true when `window.innerWidth <= 500`) to switch between desktop and mobile layouts via inline styles on key elements. CSS media queries proved unreliable due to specificity conflicts with base styles, so all critical mobile layout properties are applied as React inline styles directly.
+
+Key mobile overrides:
+- `.app-outer` — `display:block` (removes desktop flex centering)
+- `.phone` — `width:100%`, `height:100dvh`, `overflow:hidden`, `display:flex`, `flexDirection:column`
+- `.scroll` — `flex:1 1 0`, `minHeight:0`, `overflow:hidden`
+- `.timer-ring` — 240px (vs 280px desktop)
+- `.timer-digits` — 80px font (vs 96px desktop)
+
+The `isMobile` state updates on resize via a `window.addEventListener("resize", handler)` in a useEffect.
 
 ---
 
 ## Timer Engine
 
-The timer uses two separate mechanisms that work together:
+### setInterval — Game Logic (1-second resolution)
 
-### 1. setInterval — Game Logic (1-second resolution)
+Fires every second when `running` is true. Decrements `timeLeft`, accumulates `focusSecs` in work mode, and on reaching zero awards a stat, switches mode, and resets `timeLeft`.
 
-A `setInterval` fires every second when `running` is true. It:
-- Decrements `timeLeft` by 1
-- Accumulates `focusSecs` to lifetime stats when in work mode
-- On reaching zero: awards a stat, switches mode, resets `timeLeft`
+### requestAnimationFrame — Visual Arc (60fps)
 
-The interval is cleared and restarted via a `useEffect` that depends on `[running, mode, awardStat, WORK, BREAK]`.
+The arc progress ring bypasses React state entirely. A `arcRef` holds a direct DOM reference to the SVG `<circle>` element. A rAF loop updates `strokeDashoffset` at 60fps using `performance.now()` timestamps.
 
-### 2. requestAnimationFrame — Visual Arc (60fps)
-
-The arc progress ring bypasses React state entirely. An `arcRef` holds a direct reference to the SVG `<circle>` element, and a rAF loop updates `strokeDashoffset` at 60fps using `performance.now()` timestamps rather than counting seconds.
-
-This was a deliberate architectural decision: updating the arc via React state would cause the entire component to re-render 60 times per second. Direct DOM mutation via rAF is the correct solution for smooth animation at this frequency.
-
-The rAF loop records a start time and start offset when the timer begins/resumes, then interpolates to the end offset over the remaining `timeLeft * 1000` milliseconds.
+This avoids 60 React re-renders per second. The rAF loop records a start time and offset when the timer begins, then interpolates to completion over the remaining `timeLeft * 1000ms`.
 
 ---
 
 ## Audio Engine
 
-All sounds are synthesized using the Web Audio API. No audio files are loaded. A single shared `AudioContext` is created lazily on first sound and reused (`audioCtxRef`).
+All sounds synthesized via Web Audio API. No audio files. Single shared `AudioContext` created lazily on first use.
 
-### Sound Functions
+| Function | Sound | Design |
+|---|---|---|
+| `sfxTap(pitch)` | Mechanical click | Noise burst (HP 3kHz) + sine sweep 300→80Hz |
+| `sfxPause()` | Glove thud | Noise burst (LP 600Hz) + sine sweep 140→55Hz |
+| `sfxReset()` | Double tick | Two bandpass noise bursts (4kHz), 100ms apart |
+| `sfxCrack(ctx)` | Bat crack | Noise burst (HP 2kHz) + sine sweep 220→60Hz |
+| `sfxCrowd(ctx, intensity, duration)` | Crowd noise | 4 layered bandpass noise buffers (400/800/1400/2200Hz) with swell envelope |
+| `sfxHit(key)` | Hit sound | sfxCrack + sfxCrowd (scaled by hit type) + HR fanfare (4 ascending sine tones) |
 
-**`sfxTap(pitch)`** — Sharp mechanical click for Play Ball / Resume / Start Break. Two-layer design: a short noise burst high-passed at 3000Hz + a sine oscillator sweeping 300→80Hz. `pitch` parameter allows the mode-switch variant to play at 60% frequency.
+### Known Issue
 
-**`sfxPause()`** — Ball hitting a glove. Low-passed noise burst at 600Hz + a sine oscillator sweeping 140→55Hz. Softer, more muted than the tap.
+`getCtx()` is not wrapped in `useCallback`. Low risk since AudioContext is created once and never replaced, but should be addressed before a production native build.
 
-**`sfxReset()`** — Double clock tick. Two identical noise bursts (bandpass at 4000Hz) fired 100ms apart.
+---
 
-**`sfxCrack(ctx)`** — Internal helper. Bat crack: noise burst high-passed at 2000Hz + sine sweeping 220→60Hz.
+## Banner Queue System
 
-**`sfxCrowd(ctx, intensity, duration)`** — Internal helper. Synthesized crowd noise using four layered bandpass-filtered noise buffers at 400, 800, 1400, 2200Hz. A swell envelope (fade in, hold, fade out) approximates the feel of a crowd reacting. `intensity` scales volume; `duration` scales length.
+Hit distance and milestone messages share a single `activeBanner` state driven by a `bannerQueueRef` array. The `enqueueBanner(text)` function pushes to the queue and starts displaying if nothing is currently showing. Each banner displays for 4 seconds with a 300ms gap before the next. This ensures distance and milestone messages never overlap.
 
-**`sfxHit(key)`** — Public hit sound. Calls `sfxCrack`, then `sfxCrowd` after 80ms delay. HR additionally fires four ascending sine tones (C5, E5, G5, C6) as a fanfare chime.
+HR distance is enqueued first (in `awardStat`), then milestone checks run inside `setLifetime` using `setTimeout(() => enqueueBanner(...), 0)` to ensure they queue after the distance.
 
-### Known Audio Issue
+---
 
-`getCtx()` is not wrapped in `useCallback`. This is a stale closure risk — if `audioCtxRef.current` changes between renders, functions that call `getCtx()` internally may not see the update. In practice this doesn't cause bugs because the AudioContext is created once and never replaced, but it should be addressed before a production native build.
+## Milestone System
+
+Milestones are checked inside the `setLifetime` updater function using computed new totals — not React state — to avoid stale closure issues:
+
+```js
+const totalHits = newHits["1B"] + newHits["2B"] + newHits["3B"] + newHits["HR"];
+if (newHits["HR"] > 0 && newHits["HR"] % 100 === 0) enqueueBanner(...)
+if (totalHits > 0 && totalHits % 1000 === 0) enqueueBanner(...)
+```
+
+No upper limit — the modulo check works identically at 100 HRs or 100,000 HRs.
+
+---
+
+## Splash Screen
+
+Uses `sessionStorage` (not `localStorage`) to detect fresh hard closes. `sessionStorage` clears when the app is fully terminated but persists through background/resume — matching the expected behavior.
+
+On mount, `showSplash` initializes from `sessionStorage`. If true, the splash renders as a `position:fixed` overlay above everything, sets the session key immediately, then fades out at 1.5s and unmounts at 2.0s.
 
 ---
 
@@ -160,147 +185,87 @@ All sounds are synthesized using the Web Audio API. No audio files are loaded. A
 |---|---|---|
 | `ballpark_prefs_v1` | `{ workMins, breakMins, theme, sound }` | Loaded synchronously on init |
 | `ballpark_name` | string | Saved on every name change |
-| `ballpark_today` | `{ date: "YYYY-MM-DD", atBats, stats }` | Saved on every stat change via useEffect; date compared on load to auto-reset |
+| `ballpark_today` | `{ date: "YYYY-MM-DD", atBats, stats }` | Saved on every stat change; date-keyed to auto-reset at midnight |
 | `ballpark_lifetime_v1` | `{ focusSecs, hits: { "1B", "2B", "3B", "HR" } }` | Saved inline within awardStat and the interval tick |
 
-All localStorage access is wrapped in try/catch to handle private browsing mode and storage quota errors silently.
-
----
-
-## Floating Chip Animation System
-
-When a hit is awarded, a chip is added to the `floatingChips` state array with a unique `id`, the `stat` object (spread to a new object to avoid reference sharing), and a `dur` duration in milliseconds.
-
-The chip renders inside `.floating-chip-wrap`, an absolutely positioned overlay that covers the phone content area. Each chip uses a CSS keyframe animation (`floatUp1b` through `floatUpHR`) that animates from ~38% from the bottom of the phone to ~88–90% (near the top), with an opacity fade-out in the final 15% of the animation.
-
-HR chips include a bounce sequence (scale 0.7 → 1.15 → 0.95 → 1.05) before floating up.
-
-After `dur + 100ms`, the chip is removed from state via a `setTimeout`. The 100ms buffer ensures the CSS animation has fully completed (and opacity reached 0) before the DOM element is removed.
-
-**Note:** On real devices, chips may animate into the notch or Dynamic Island area. This will be addressed with `env(safe-area-inset-top)` when building the PWA or native version.
+All access wrapped in try/catch to handle private browsing and storage quota errors.
 
 ---
 
 ## Known Technical Debt
 
-1. **`getCtx` stale closure** — not wrapped in `useCallback`, low risk currently but should be fixed before native build
-2. **`animTimerRef` and `arcStartRef`** — declared but unused, safe to remove
-3. **`awardStat` deps** — currently `[sfxHit, soundOn]`, may still have edge cases
-4. **No error boundary** — an uncaught render error will blank the entire app
-5. **Timer pauses when tab is hidden** — `setInterval` throttles in background tabs; background execution requires Web Worker or native solution
-6. **Midnight edge case** — `todayKey` is computed once on component mount; a user who leaves the app open across midnight will see stale date until refresh
-7. **Confetti colors hardcoded** — not theme-aware, uses Day Game palette regardless of active theme
-8. **`call` state** — flavor text is computed and stored but never displayed in the UI
+1. **`getCtx` not in useCallback** — low risk currently, should fix before native build
+2. **`animTimerRef`** — declared but unused, safe to remove
+3. **`awardStat` deps** — `[sfxHit, soundOn, enqueueBanner]`, may have edge cases
+4. **No error boundary** — uncaught render error will blank the app
+5. **Timer pauses in background** — setInterval throttles in background tabs; requires Web Worker or native solution
+6. **Midnight edge case** — `todayKey` computed on mount; app open across midnight shows stale date until refresh
+7. **Confetti colors hardcoded** — not theme-aware, uses Day Game palette
+8. **`call` state** — computed and stored but never displayed in UI
 
 ---
 
 ## QA Test Plan & Results
 
-All tests below were performed manually on the V1 build. All passed unless otherwise noted.
+All tests performed manually on V1 build. All passed.
 
-### Run Once (Any Theme)
+### Core Timer
+- [x] Start → LIVE dot appears, countdown begins
+- [x] Pause → glove thud, LIVE disappears
+- [x] Resume → click sound, LIVE returns
+- [x] Reset while running → double tick, resets to full
+- [x] Reset while paused → resets to full
+- [x] Work timer reaches zero → stat awarded, chip animates, mode switches to Dugout
+- [x] Break timer reaches zero → returns to At Plate
+- [x] Manual mode switch → resets timer to new mode duration
 
-**Core Timer**
-- [x] Start timer — LIVE dot appears and counts down
-- [x] Pause — LIVE disappears, glove thud sound plays
-- [x] Resume — LIVE reappears, click sound plays
-- [x] Reset while running — clock tick plays, timer resets to full
-- [x] Reset while paused — timer resets to full
-- [x] Let work timer reach zero — stat awarded, floating chip animates up, mode switches to Dugout automatically
-- [x] Let break timer reach zero — returns to At Plate automatically
-- [x] Start Break manually — CHANGING SIDES appears with pulse dot
-
-**Floating Chips**
-- [x] Complete sessions until you get a Single, Double, Triple and HR — each shows the correct label
-- [x] HR — confetti fires and fanfare plays alongside chip
-- [x] Chip animates up and fades out cleanly without affecting button layout
-
-**Sound**
-- [x] Play Ball / Resume / Start Break → sharp click
-- [x] Pause → glove thud
-- [x] Reset → double clock tick
-- [x] Mode tab switch → softer click
-- [x] Mute via speaker icon — all sounds go silent
-- [x] Unmute — double tick confirmation plays
-- [x] Single / Double / Triple / HR — crowd intensity scales up with each
-- [x] HR — fanfare chime plays over crowd
-
-**Stats & Scoring**
+### Stats & Scoring
 - [x] AB increments every session
 - [x] Today's Scorecard updates correctly
 - [x] Ticker log updates with correct timestamps
-- [x] Lifetime Career Stats accumulate and persist after page refresh
-- [x] Today's Scorecard persists after page refresh on same calendar day
+- [x] HR shows distance in ticker instead of time
+- [x] HR distance banner appears below mode tabs
+- [x] HR distance banner does not shift layout
+- [x] Milestone banner queues after HR distance
+- [x] Both milestones queue sequentially if triggered together
+- [x] Career Stats accumulate and persist after refresh
+- [x] Today's Scorecard persists after refresh on same day
 
-**Settings**
-- [x] Change At Plate duration — timer reflects new value if not running
-- [x] Change At Plate duration while running — doesn't affect current session
-- [x] Change Dugout duration — same checks
-- [x] Stepper can't go below 1 min on either
-- [x] Only one theme toggle can be on at a time
-- [x] Tap outside settings panel — closes it
-- [x] First tap Reset Career Stats — button changes to "Are you sure? Tap to confirm"
-- [x] Second tap — stats wiped
-- [x] Close settings without confirming — confirm state resets to "Reset Career Stats"
+### Sound
+- [x] All button sounds fire correctly
+- [x] Hit sounds scale with hit type (Singles quieter than HRs)
+- [x] HR fanfare plays
+- [x] Mute silences all sounds
+- [x] Unmute plays confirmation tick
 
-**Player Name**
-- [x] Tap pencil — input appears
-- [x] Type name and confirm — saves correctly
-- [x] Refresh page — name persists
-- [x] Clear name — falls back to "Player"
+### Settings
+- [x] Duration changes apply when not running
+- [x] Duration changes don't affect running session
+- [x] Theme switches apply immediately without resetting timer
+- [x] Reset Career Stats two-tap confirmation
+- [x] Confirm state clears when settings panel closes
+- [x] Sound preference persists after refresh
 
-**Edge Cases**
-- [x] Rapid mode tab switching while timer is running — UI settles correctly, no glitches
-- [x] Open/close settings repeatedly while timer running — timer continues unaffected
-- [x] Switch theme mid-countdown — time doesn't reset
-- [x] Very long player name — navbar handles gracefully
-- [x] HR confetti clears after ~3 seconds
+### Themes — Visual Checks (all three themes)
+- [x] At Plate and Dugout backgrounds visually distinct
+- [x] All text readable in both modes
+- [x] Floating chips legible
+- [x] Settings panel readable
+- [x] Transition smooth between themes
 
----
+### Splash Screen
+- [x] Shows on first launch after hard close
+- [x] Does not show on background/resume
+- [x] Fades out smoothly at 1.5s
+- [x] Fully gone at 2s
+- [x] App renders correctly beneath it
 
-### Per-Theme Visual Checks
-
-**Day Game**
-- [x] At Plate background is dark green, Dugout shifts to lighter green
-- [x] LIVE dot visible and readable
-- [x] CHANGING SIDES dot and text readable
-- [x] Timer digits readable in both modes
-- [x] Floating chips legible against background — cream for hits, gold for HR
-- [x] Work button (Play Ball) — white text on green
-- [x] Break button (Start Break) — white text on tan/cream
-- [x] Mode tabs readable in both states
-- [x] Settings panel — all text readable
-- [x] Sound icon visible (white)
-- [x] Reset Career Stats confirm state — coral text readable
-- [x] Theme switch transition smooth, timer unaffected
-
-**Statsheet**
-- [x] At Plate background is warm parchment, Dugout shifts subtly lighter
-- [x] LIVE dot visible and readable
-- [x] CHANGING SIDES dot and text readable
-- [x] Timer digits readable in both modes
-- [x] Floating chips legible — dusty red for hits, gold for HR
-- [x] Work button — white text on charcoal
-- [x] Break button — white text on dusty red
-- [x] Mode tabs readable in both states
-- [x] Settings panel — all text readable
-- [x] Sound icon visible (dark charcoal)
-- [x] Reset Career Stats confirm state — dusty red text readable
-- [x] Theme switch transition smooth, timer unaffected
-
-**Bananas**
-- [x] At Plate background is yellow, Dugout shifts to softer yellow
-- [x] LIVE dot visible and readable
-- [x] CHANGING SIDES dot and text readable
-- [x] Timer digits readable in both modes
-- [x] Floating chips legible — deep teal for hits, deep red for HR
-- [x] Work button — white text on brown
-- [x] Break button — white text on deep teal
-- [x] Mode tabs readable in both states
-- [x] Settings panel — all text readable
-- [x] Sound icon visible (dark brown)
-- [x] Reset Career Stats confirm state — burnt orange text readable
-- [x] Theme switch transition smooth, timer unaffected
+### Mobile PWA
+- [x] Installs to home screen on iPhone
+- [x] Launches fullscreen with no browser chrome
+- [x] No scroll required on main screen
+- [x] All elements full-width
+- [x] Safe area insets respected
 
 ---
 
@@ -308,26 +273,24 @@ All tests below were performed manually on the V1 build. All passed unless other
 
 | Issue | Resolution |
 |---|---|
-| Player name not persisted after browser refresh | Added localStorage save on name change, lazy init from storage |
-| Today's Scorecard reset on every page refresh | Added date-keyed localStorage persistence; auto-resets at midnight |
-| Floating chip showed wrong hit type | Fixed stale closure in chip state; stat object now spread to fresh copy |
-| Reset Career Stats confirm state persisted after closing settings | Added `useEffect` to reset `confirmReset` when `open` prop goes false |
-| Sound icon low contrast on Day Game | Added `soundIconColor` token per theme, separate from `navbarIcon` |
-| Settings section titles too small | Bumped from 11px to 13px |
-| Focus Time in Career Stats visually subordinate | Matched to `stepper-label` size (17px/700 weight) |
-| HR chip color read as brown on Bananas and Statsheet | Replaced with bright gold `#E0A800` on Statsheet; deep red `#8B1A1A` on Bananas |
-| All chip colors used work button colors (not distinctive) | Introduced per-theme `chipBg`/`chipHRBg` token system |
-| Emoji contrast poor on Day Game gold chip | Switched Day Game normal chips to cream `#8C6238` with white text |
-| Statsheet background too neutral/grey | Warmed to parchment `#ece5d0`; accent updated to vintage ink red `#7a3030` |
-| Statsheet Dugout background shift too jarring / too subtle | Tuned to `#f5ede2` as middle ground |
-| Bananas accent cyan felt clinical against warm palette | Replaced with deep teal `#1a5c50` |
+| Player name not persisted | Added localStorage save on name change |
+| Today's Scorecard reset on refresh | Added date-keyed localStorage persistence |
+| Reset confirm state persisted after closing settings | Added useEffect to reset on panel close |
+| Sound icon low contrast on Day Game | Added per-theme `soundIconColor` token |
+| Empty stat values (0) failed contrast | Brightened `statValDim` per theme |
+| CHANGING SIDES label failed contrast on all themes | Brightened `breakLabel` per theme |
+| Reset button text failed contrast on Statsheet | Darkened to `#4a4a4a` |
+| Statsheet background too grey | Warmed to parchment `#ece5d0` |
+| Bananas cyan felt clinical | Replaced with deep teal `#1a5c50` → `#00C4A0` |
+| Bananas navy read as Michigan Wolverines | Switched to near-black base |
+| Mobile layout showed narrow centered column | Switched from CSS media queries to isMobile inline styles |
+| isMobile defined in wrong component scope | Moved from SettingsPanel to BaseballPomodoro |
+| HR banner shifted layout on trigger | Switched to fixed-height wrapper always present in DOM |
 
 ---
 
 ## WCAG Contrast Audit Summary
 
-All theme color pairings were audited computationally. Minimum threshold: 4.5:1 (WCAG AA).
+All theme color pairings audited computationally. Minimum threshold: 4.5:1 (WCAG AA), 3.0:1 for large text.
 
-Every text-on-background, button-text-on-button, and chip-text-on-chip combination passes. The tightest passing value in the final build is deep teal on Bananas settings background at 4.94:1.
-
-Reset button normal and confirm states were individually audited per theme across both the base button background and the confirmed button background, all passing.
+Every text-on-background, button-text-on-button, and chip-text-on-chip combination passes across all three themes in both At Plate and Dugout modes, including the settings panel background. The tightest passing value is deep teal on Bananas settings background at 4.94:1.

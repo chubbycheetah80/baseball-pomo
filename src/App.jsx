@@ -685,23 +685,6 @@ export default function BaseballPomodoro() {
   const rafRef       = useRef(null);
   const audioCtxRef  = useRef(null);
   const [soundOn, setSoundOn] = useState(() => { try { const p = JSON.parse(localStorage.getItem("ballpark_prefs_v1")); return p?.sound !== false; } catch(e) { return true; } });
-  const forceHRRef = useRef(false);
-
-  // DEBUG: Shift+D sets career HRs to 99 for milestone testing
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.shiftKey && e.key === 'D') {
-        const empty = { focusSecs: 0, hits: { "1B": 0, "2B": 0, "3B": 0, "HR": 0 } };
-        const current = (() => { try { return JSON.parse(localStorage.getItem("ballpark_lifetime_v1")) || empty; } catch(e) { return empty; } })();
-        const updated = { ...current, hits: { ...current.hits, HR: 99 } };
-        localStorage.setItem("ballpark_lifetime_v1", JSON.stringify(updated));
-        setLifetime(updated);
-        alert("Career HRs set to 99. Now Alt+click the timer to trigger the 100th!");
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
 
   // When durations change while not running, update the display
   useEffect(() => {
@@ -908,10 +891,7 @@ export default function BaseballPomodoro() {
   }, []);
 
   const awardStat = useCallback(() => {
-    const stat = forceHRRef.current
-      ? STATS.find(s => s.key === "HR")
-      : getRandomStat();
-    forceHRRef.current = false;
+    const stat = getRandomStat();
     if (soundOn) sfxHit(stat.key);
     setLastStat(stat);
     setAtBats(a => a+1);
@@ -1452,8 +1432,7 @@ export default function BaseballPomodoro() {
                 </svg>
                 <div className="timer-inner" style={isMobile ? {width:"240px",height:"240px"} : {}}>
                   <div className="timer-digits" role="timer" aria-label={`${fmt(timeLeft)} remaining`}
-                    onClick={(e) => { if (e.altKey) { forceHRRef.current = true; awardStat(); } }}
-                    style={isMobile ? {cursor:"default",fontSize:"80px"} : {cursor:"default"}}>
+                    style={isMobile ? {fontSize:"80px"} : {}}>
                     {fmt(timeLeft)}
                   </div>
                   <div className="timer-mode-lbl">{mode==="work" ? "Focus" : "Rest"}</div>
