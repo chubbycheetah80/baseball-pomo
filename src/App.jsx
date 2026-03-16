@@ -585,6 +585,20 @@ export default function BaseballPomodoro() {
     } catch(e) {}
   }, []);
 
+  // Splash screen — shows on first open after hard close (sessionStorage clears on hard close)
+  const [showSplash, setShowSplash] = useState(() => {
+    try { return !sessionStorage.getItem("ballpark_launched"); } catch(e) { return false; }
+  });
+  const [splashFading, setSplashFading] = useState(false);
+  useEffect(() => {
+    if (!showSplash) return;
+    try { sessionStorage.setItem("ballpark_launched", "1"); } catch(e) {}
+    // Start fade at 1.5s, fully hidden at 2s
+    const fadeTimer = setTimeout(() => setSplashFading(true), 1500);
+    const hideTimer = setTimeout(() => setShowSplash(false), 2000);
+    return () => { clearTimeout(fadeTimer); clearTimeout(hideTimer); };
+  }, []);
+
   // Inject critical mobile reset into document.head for full page scope
   useEffect(() => {
     try {
@@ -1230,6 +1244,8 @@ export default function BaseballPomodoro() {
         }
 
         /* ── Keyframes ── */
+        @keyframes splashBallPop { 0% { transform:scale(0.4); opacity:0; } 100% { transform:scale(1); opacity:1; } }
+        @keyframes splashTextFade { 0% { opacity:0; transform:translateY(10px); } 100% { opacity:1; transform:translateY(0); } }
         @keyframes confettiFall { 0% { transform:translateY(0) rotate(0deg); opacity:1; } 100% { transform:translateY(950px) rotate(720deg); opacity:0; } }
         @keyframes floatUp1b { 0% { bottom:38%; opacity:1; transform:translateX(-50%) scale(0.8); } 15% { transform:translateX(-50%) scale(1.05); } 85% { opacity:1; } 100% { bottom:88%; opacity:0; transform:translateX(-50%) scale(0.95); } }
         @keyframes floatUp2b { 0% { bottom:38%; opacity:1; transform:translateX(-50%) scale(0.8); } 15% { transform:translateX(-50%) scale(1.08); } 85% { opacity:1; } 100% { bottom:88%; opacity:0; transform:translateX(-50%) scale(0.95); } }
@@ -1239,6 +1255,59 @@ export default function BaseballPomodoro() {
         @keyframes livePulse { 0% { box-shadow:0 0 0 0 rgba(192,57,43,0.8); } 65% { box-shadow:0 0 0 8px rgba(192,57,43,0); } 100% { box-shadow:0 0 0 0 rgba(192,57,43,0); } }
         @keyframes breakPulse { 0%,100% { opacity:0.5; } 50% { opacity:1; } }
       `}</style>
+
+      {/* ── Splash Screen ── */}
+      {showSplash && (
+        <div style={{
+          position:"fixed", inset:0, zIndex:9999,
+          background:"#1a3a2a",
+          display:"flex", flexDirection:"column",
+          alignItems:"center", justifyContent:"center", gap:"24px",
+          opacity: splashFading ? 0 : 1,
+          transition: splashFading ? "opacity 0.5s ease" : "none",
+          pointerEvents:"none",
+        }}>
+          {/* Baseball icon */}
+          <div style={{
+            width:"96px", height:"96px", borderRadius:"50%",
+            background:"#f5f0e8",
+            display:"flex", alignItems:"center", justifyContent:"center",
+            boxShadow:"0 8px 32px rgba(0,0,0,0.4)",
+            animation:"splashBallPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards",
+          }}>
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+              {/* Baseball seams */}
+              <circle cx="32" cy="32" r="28" fill="#f5f0e8" stroke="#e0d8c8" strokeWidth="1.5"/>
+              {/* Left seam arc */}
+              <path d="M20 14 C14 20, 14 44, 20 50" stroke="#c0392b" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+              <path d="M17 18 C22 22, 22 26, 18 30" stroke="#c0392b" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+              <path d="M17 34 C22 38, 22 42, 18 46" stroke="#c0392b" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+              {/* Right seam arc */}
+              <path d="M44 14 C50 20, 50 44, 44 50" stroke="#c0392b" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+              <path d="M47 18 C42 22, 42 26, 46 30" stroke="#c0392b" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+              <path d="M47 34 C42 38, 42 42, 46 46" stroke="#c0392b" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+            </svg>
+          </div>
+          {/* App name */}
+          <div style={{
+            display:"flex", flexDirection:"column", alignItems:"center", gap:"6px",
+            animation:"splashTextFade 0.5s ease 0.25s both",
+          }}>
+            <div style={{
+              fontFamily:"'Barlow Condensed',sans-serif",
+              fontSize:"36px", fontWeight:800,
+              color:"#ffffff", letterSpacing:"0.06em",
+              textTransform:"uppercase",
+            }}>Baseball</div>
+            <div style={{
+              fontFamily:"'Barlow Condensed',sans-serif",
+              fontSize:"36px", fontWeight:800,
+              color:"#e8c547", letterSpacing:"0.06em",
+              textTransform:"uppercase", marginTop:"-10px",
+            }}>Pomodoro</div>
+          </div>
+        </div>
+      )}
 
       <div className="app-outer" style={isMobile ? {display:"block",width:"100%",minHeight:"100dvh",background:mode==="work"?T.scrollBg:T.scrollBgBreak} : {display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh",background:T.wallBg}}>
         <div className="phone" role="main" aria-label="Ballpark Focus Pomodoro Timer" style={isMobile ? {width:"100%",height:"100dvh",maxHeight:"100dvh",overflow:"hidden",display:"flex",flexDirection:"column",borderRadius:0,boxShadow:"none",background:mode==="work"?T.scrollBg:T.scrollBgBreak,transition:"background 0.5s ease"} : {background:mode==="work"?T.scrollBg:T.scrollBgBreak,transition:"background 0.5s ease"}}>
