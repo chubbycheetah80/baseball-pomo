@@ -1010,6 +1010,39 @@ export default function BaseballPomodoro() {
         @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap');
         *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
         body { background:${T.wallBg}; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family:'Barlow',sans-serif; }
+        /* ── Mobile full-screen override ── */
+        @media (max-width: 480px) {
+          body { background:${mode==="work" ? T.scrollBg : T.scrollBgBreak}; min-height:100dvh; align-items:stretch; }
+          .phone { width:100% !important; height:100dvh !important; border-radius:0 !important; box-shadow:none !important; }
+          .phone::before, .phone::after { display:none !important; }
+          .notch { display:none !important; }
+          .status { display:none !important; }
+          .scroll {
+            overflow:hidden !important;
+            padding: env(safe-area-inset-top, 20px) 20px 0 20px;
+            justify-content:space-between;
+          }
+          .navbar { padding:8px 0 10px; }
+          .stat-card-wrap { padding:10px 8px 8px; margin-bottom:8px; }
+          .stat-date { margin-bottom:8px; }
+          .stat-col-val { font-size:26px !important; }
+          .ticker-wrap { margin-bottom:8px; }
+          .mode-tabs { margin-bottom:10px; }
+          .hr-banner-wrap { height:32px !important; }
+          .hr-banner { font-size:18px !important; }
+          .live-bar { min-height:20px !important; margin-bottom:6px !important; }
+          .timer-wrap { flex:0 0 auto !important; padding:0 !important; align-items:center; }
+          .timer-ring { width:220px !important; height:220px !important; }
+          .timer-ring svg { width:220px !important; height:220px !important; }
+          .timer-inner { width:220px !important; height:220px !important; }
+          .timer-digits { font-size:74px !important; }
+          .btn-stack { padding:8px 0 max(env(safe-area-inset-bottom, 16px), 20px); gap:8px; }
+          .btn-primary { min-height:50px !important; }
+          .btn-reset { min-height:40px !important; }
+          .floating-chip-wrap { border-radius:0 !important; }
+          .settings-backdrop { border-radius:0 !important; }
+          .settings-panel { border-radius:0 44px 44px 0 !important; }
+        }
 
         /* ── Phone ── */
         .phone { width:375px; height:812px; border-radius:44px; box-shadow: 0 0 0 2px ${T.phoneRing}, 0 0 0 7px #111, 0 40px 100px rgba(0,0,0,0.55); position:relative; overflow:hidden; display:flex; flex-direction:column; transition:background 0.5s ease; }
@@ -1166,7 +1199,7 @@ export default function BaseballPomodoro() {
         @keyframes breakPulse { 0%,100% { opacity:0.5; } 50% { opacity:1; } }
       `}</style>
 
-      <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:T.wallBg}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh",background:T.wallBg}}>
         <div className="phone" role="main" aria-label="Ballpark Focus Pomodoro Timer" style={{background: mode==="work" ? T.scrollBg : T.scrollBgBreak, transition:"background 0.5s ease"}}>
           <Confetti active={confetti} />
           <div className="notch" aria-hidden="true" />
@@ -1291,7 +1324,7 @@ export default function BaseballPomodoro() {
               }
 
               {/* Progress ring — rAF driven for 60fps smoothness */}
-              <div className="timer-ring" style={{width:"280px",height:"280px"}}>
+              <div className="timer-ring" style={{width:"280px",height:"280px",maxWidth:"100%"}}>
                 <svg width="280" height="280" viewBox="0 0 280 280" aria-hidden="true">
                   <circle cx="140" cy="140" r="126" fill="none" stroke={T.arcTrack} strokeWidth="6" transform="rotate(-90 140 140)" />
                   <circle
