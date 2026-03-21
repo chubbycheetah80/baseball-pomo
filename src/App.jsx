@@ -90,12 +90,12 @@ modeTabBreakBg: "#8C6238",
   },
   bananas: {
     name: "Bananas",
-    phoneBg:        "#FF5FA0",
-    phoneRing:      "#e04e8a",
-    wallBg:         "#e04e8a",
-    scrollBg:       "#FF5FA0",
-    scrollBgBreak:  "#e04e8a",
-    settingsBg:     "#e04e8a",
+    phoneBg:        "#1a1a1a",
+    phoneRing:      "#2a2a2a",
+    wallBg:         "#111111",
+    scrollBg:       "#1a1a1a",
+    scrollBgBreak:  "#222222",
+    settingsBg:     "#111111",
     statusColor:    "#F4D000",
     navbarName:     "#ffffff",
     editIcon:       "#ffffff",
@@ -612,15 +612,21 @@ export default function BaseballPomodoro() {
       el.textContent = `
         html, body, #root {
           margin: 0; padding: 0;
-          width: 100%; height: 100%;
+          width: 100%;
+        }
+        html {
+          height: 100%;
+          background: ${mode === "work" ? T.scrollBg : T.scrollBgBreak} !important;
         }
         body {
           display: block !important;
           min-height: 100dvh;
+          height: 100%;
           overflow: hidden;
           background: ${mode === "work" ? T.scrollBg : T.scrollBgBreak} !important;
         }
-        html {
+        #root {
+          height: 100%;
           background: ${mode === "work" ? T.scrollBg : T.scrollBgBreak} !important;
         }
       `;
