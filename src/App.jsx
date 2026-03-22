@@ -585,6 +585,19 @@ export default function BaseballPomodoro() {
     } catch(e) {}
   }, []);
 
+  // Prevent iOS rubber band / bounce scrolling on the main screen
+  useEffect(() => {
+    if (!isMobile) return;
+    const prevent = (e) => {
+      // Allow scroll inside settings panel only
+      const panel = document.querySelector('.settings-panel');
+      if (panel && panel.contains(e.target)) return;
+      e.preventDefault();
+    };
+    document.addEventListener('touchmove', prevent, { passive: false });
+    return () => document.removeEventListener('touchmove', prevent);
+  }, [isMobile]);
+
   // Splash screen — shows on first open after hard close (sessionStorage clears on hard close)
   const [showSplash, setShowSplash] = useState(() => {
     try { return !sessionStorage.getItem("ballpark_launched"); } catch(e) { return false; }
@@ -1189,7 +1202,7 @@ export default function BaseballPomodoro() {
         @media (max-width: 480px) {
           body { background:${mode==="work" ? T.scrollBg : T.scrollBgBreak}; min-height:100dvh; align-items:stretch; }
           .app-outer { display:block !important; min-height:calc(100dvh + 50px) !important; padding:0 !important; margin-bottom:-50px !important; background:${mode==="work" ? T.scrollBg : T.scrollBgBreak} !important; }
-          .phone { width:100% !important; height:100dvh !important; border-radius:0 !important; box-shadow:none !important; overflow:visible !important; }
+          .phone { width:100% !important; height:100dvh !important; border-radius:0 !important; box-shadow:none !important; overflow:visible !important; overscroll-behavior:none !important; }
           .phone::before, .phone::after { display:none !important; }
           .notch { display:none !important; }
           .status { display:none !important; }
@@ -1199,6 +1212,8 @@ export default function BaseballPomodoro() {
             flex-direction:column !important;
             height:100% !important;
             padding: env(safe-area-inset-top, 16px) 24px env(safe-area-inset-bottom, 16px) 24px !important;
+            overscroll-behavior:none !important;
+            touch-action:none !important;
           }
           .navbar { padding:8px 0 10px; flex:0 0 auto; }
           .stat-card-wrap { padding:12px 12px 10px; margin-bottom:10px; flex:0 0 auto; width:100%; }
@@ -1229,6 +1244,7 @@ export default function BaseballPomodoro() {
             border-radius:0 !important;
             padding-top:calc(env(safe-area-inset-top, 0px) + 8px) !important;
             padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 32px) !important;
+            overscroll-behavior:none !important;
           }
           .settings-backdrop {
             border-radius:0 !important;
