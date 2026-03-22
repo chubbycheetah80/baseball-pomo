@@ -585,18 +585,7 @@ export default function BaseballPomodoro() {
     } catch(e) {}
   }, []);
 
-  // Prevent iOS rubber band / bounce scrolling on the main screen
-  useEffect(() => {
-    if (!isMobile) return;
-    const prevent = (e) => {
-      // Allow scroll inside settings panel only
-      const panel = document.querySelector('.settings-panel');
-      if (panel && panel.contains(e.target)) return;
-      e.preventDefault();
-    };
-    document.addEventListener('touchmove', prevent, { passive: false });
-    return () => document.removeEventListener('touchmove', prevent);
-  }, [isMobile]);
+
 
   // Splash screen — shows on first open after hard close (sessionStorage clears on hard close)
   const [showSplash, setShowSplash] = useState(() => {
@@ -1147,7 +1136,7 @@ export default function BaseballPomodoro() {
 
         /* ── Settings panel ── */
         .settings-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0.45); z-index:200; border-radius:44px; }
-        .settings-panel { position:absolute; top:0; right:0; bottom:0; width:88%; background:${T.settingsBg}; transition:background 0.5s ease; border-radius:0 44px 44px 0; z-index:201; transform:translateX(100%); transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); display:flex; flex-direction:column; overflow-y:auto; scrollbar-width:none; border-left:1px solid ${T.settingsDivider}; }
+        .settings-panel { position:absolute; top:0; right:0; bottom:0; width:88%; background:${T.settingsBg}; transition:background 0.5s ease; border-radius:0 44px 44px 0; z-index:201; transform:translateX(100%); transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); display:flex; flex-direction:column; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:none; scrollbar-width:none; border-left:1px solid ${T.settingsDivider}; }
         .settings-panel::-webkit-scrollbar { display:none; }
         .settings-panel.open { transform:translateX(0); }
         .settings-header { display:flex; align-items:center; justify-content:space-between; padding:0px 24px 20px; border-bottom:1px solid ${T.settingsDivider}; flex-shrink:0; }
@@ -1202,7 +1191,7 @@ export default function BaseballPomodoro() {
         @media (max-width: 480px) {
           body { background:${mode==="work" ? T.scrollBg : T.scrollBgBreak}; min-height:100dvh; align-items:stretch; }
           .app-outer { display:block !important; min-height:calc(100dvh + 50px) !important; padding:0 !important; margin-bottom:-50px !important; background:${mode==="work" ? T.scrollBg : T.scrollBgBreak} !important; }
-          .phone { width:100% !important; height:100dvh !important; border-radius:0 !important; box-shadow:none !important; overflow:visible !important; overscroll-behavior:none !important; }
+          .phone { width:100% !important; height:100dvh !important; border-radius:0 !important; box-shadow:none !important; overflow:hidden !important; overscroll-behavior:none !important; }
           .phone::before, .phone::after { display:none !important; }
           .notch { display:none !important; }
           .status { display:none !important; }
@@ -1213,7 +1202,8 @@ export default function BaseballPomodoro() {
             height:100% !important;
             padding: env(safe-area-inset-top, 16px) 24px env(safe-area-inset-bottom, 16px) 24px !important;
             overscroll-behavior:none !important;
-            touch-action:none !important;
+            -webkit-overflow-scrolling:touch !important;
+            overflow-y:auto !important;
           }
           .navbar { padding:8px 0 10px; flex:0 0 auto; }
           .stat-card-wrap { padding:12px 12px 10px; margin-bottom:10px; flex:0 0 auto; width:100%; }
@@ -1245,6 +1235,8 @@ export default function BaseballPomodoro() {
             padding-top:calc(env(safe-area-inset-top, 0px) + 8px) !important;
             padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 32px) !important;
             overscroll-behavior:none !important;
+            -webkit-overflow-scrolling:touch !important;
+            overflow-y:auto !important;
           }
           .settings-backdrop {
             border-radius:0 !important;
