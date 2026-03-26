@@ -532,10 +532,10 @@ function SettingsPanel({ open, onClose, workMins, breakMins, onWorkChange, onBre
           <div className="settings-divider" />
           <div className="lifetime-hits-grid">
             {[
-              { key:"1B", label:"Singles"   },
-              { key:"2B", label:"Doubles"   },
-              { key:"3B", label:"Triples"   },
-              { key:"HR", label:"Home Runs" },
+              { key:"1B", label:"1B" },
+              { key:"2B", label:"2B" },
+              { key:"3B", label:"3B" },
+              { key:"HR", label:"HR" },
             ].map(({ key, label }) => (
               <div key={key} className="lifetime-cell">
                 <span className="lifetime-val">{lifetime.hits[key]}</span>
@@ -1039,7 +1039,7 @@ export default function BaseballPomodoro() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap');
         *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
         body { background:${T.wallBg}; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family:'Barlow',sans-serif; }
 
@@ -1051,7 +1051,7 @@ export default function BaseballPomodoro() {
 
         /* ── Status bar ── */
         .status { height:44px; flex-shrink:0; z-index:10; position:relative; display:flex; align-items:flex-end; justify-content:space-between; padding:0 28px 6px; }
-        .s-time { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; color:${T.statusColor}; letter-spacing:0.04em; }
+        .s-time { font-family:'Barlow',sans-serif; font-size:15px; font-weight:700; color:${T.statusColor}; letter-spacing:0.02em; }
         .s-icons { display:flex; gap:4px; align-items:center; color:${T.statusColor}; }
 
         /* ── Scroll ── */
@@ -1069,12 +1069,12 @@ export default function BaseballPomodoro() {
 
         /* ── Stat card ── */
         .stat-card-wrap { background:${T.cardBg}; transition:background 0.5s ease; border-radius:14px; padding:14px 8px 12px; margin-bottom:10px; }
-        .stat-date { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:600; color:${T.cardDate}; letter-spacing:0.16em; text-transform:uppercase; text-align:center; margin-bottom:12px; }
+        .stat-date { font-family:'Silkscreen',sans-serif; font-size:13px; font-weight:400; color:${T.cardDate}; letter-spacing:0.05em; text-transform:uppercase; text-align:center; margin-bottom:12px; }
         .stat-row { display:flex; align-items:flex-start; }
         .stat-col { flex:1; text-align:center; position:relative; }
         .stat-col+.stat-col::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:1px; height:55%; background:${T.statDivider}; }
         .stat-col-key { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; color:${T.statKey}; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:5px; }
-        .stat-col-val { font-family:'Barlow Condensed',sans-serif; font-size:32px; font-weight:800; line-height:1; color:${T.statValDim}; transition:color 0.3s; }
+        .stat-col-val { font-family:'Silkscreen',sans-serif; font-size:22px; font-weight:400; line-height:1; color:${T.statValDim}; transition:color 0.3s; }
         .stat-col-val.active { color:${T.statValActive}; }
         .stat-col-val.flash  { animation:numPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
 
@@ -1101,8 +1101,8 @@ export default function BaseballPomodoro() {
         .live-bar { display:flex; align-items:center; justify-content:center; gap:7px; min-height:22px; }
         .live-dot { width:8px; height:8px; border-radius:50%; background:#c0392b; flex-shrink:0; animation:livePulse 1.8s ease-in-out infinite; }
         .break-dot { width:8px; height:8px; border-radius:50%; background:${T.breakLabel}; flex-shrink:0; animation:breakPulse 2.8s ease-in-out infinite; }
-        .break-label { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; color:${T.liveLabel}; letter-spacing:0.22em; }
-        .live-label { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:800; color:${T.liveLabel}; letter-spacing:0.26em; }
+        .break-label { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:800; color:${T.liveLabel}; letter-spacing:0.22em; }
+        .live-label { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:800; color:${T.liveLabel}; letter-spacing:0.22em; }
 
         /* ── Timer ── */
         .timer-wrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0; }
@@ -1158,8 +1158,8 @@ export default function BaseballPomodoro() {
         .stepper-btn:hover:not(:disabled) { background:${T.cardBg}; }
         .stepper-btn:disabled { opacity:0.3; cursor:not-allowed; }
         .stepper-btn:focus-visible { outline:3px solid ${T.focusOutline}; outline-offset:3px; }
-        .stepper-value { font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; color:${T.stepperVal}; min-width:52px; text-align:center; letter-spacing:-0.01em; }
-        .stepper-unit { font-size:14px; font-weight:600; color:${T.stepperUnit}; margin-left:4px; }
+        .stepper-value { font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; color:${T.stepperVal}; min-width:52px; text-align:center; letter-spacing:-0.02em; }
+        .stepper-unit { font-size:14px; font-weight:400; color:${T.stepperUnit}; margin-left:4px; }
 
         /* Lifetime stats */
         .lifetime-row-single { display:flex; align-items:center; justify-content:space-between; padding:10px 4px; margin-bottom:4px; }
@@ -1168,7 +1168,7 @@ export default function BaseballPomodoro() {
         .lifetime-hits-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:1px; background:${T.lifetimeGridBg}; border-radius:12px; overflow:hidden; margin:12px 0 16px; }
         .lifetime-cell { background:${T.lifetimeCellBg}; padding:12px 4px; text-align:center; display:flex; flex-direction:column; gap:4px; }
         .lifetime-val { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:800; color:${T.lifetimeVal}; letter-spacing:-0.01em; line-height:1; }
-        .lifetime-key { font-size:9px; font-weight:600; color:${T.lifetimeKey}; letter-spacing:0.12em; text-transform:uppercase; }
+        .lifetime-key { font-size:9px; font-weight:400; color:${T.lifetimeKey}; letter-spacing:0.05em; text-transform:uppercase; }
         .reset-btn { width:100%; min-height:40px; background:rgba(192,57,43,0.12); border:1px solid rgba(192,57,43,0.25); border-radius:10px; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:${T.resetColor}; cursor:pointer; transition:background 0.2s, color 0.2s; }
         .reset-btn:hover { background:rgba(192,57,43,0.22); }
         .reset-btn.confirm { background:rgba(192,57,43,0.18); color:${T.resetConfirmColor}; border-color:rgba(192,57,43,0.4); font-size:12px; }
@@ -1183,9 +1183,9 @@ export default function BaseballPomodoro() {
 
         /* Theme rows */
         /* Badges */
-        .settings-coming-soon { display:flex; align-items:center; justify-content:space-between; padding:10px 4px; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600; color:${T.comingSoonColor}; letter-spacing:0.04em; }
-        .settings-badge { font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; background:${T.badgeBg}; color:${T.badgeColor}; padding:3px 8px; border-radius:6px; }
-        .settings-badge-soon { font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; background:${T.badgeSoonBg}; color:${T.badgeSoonColor}; padding:3px 8px; border-radius:6px; }
+        .settings-coming-soon { display:flex; align-items:center; justify-content:space-between; padding:10px 4px; font-family:'Barlow',sans-serif; font-size:16px; font-weight:400; color:${T.comingSoonColor}; letter-spacing:0.02em; }
+        .settings-badge { font-size:10px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; background:${T.badgeBg}; color:${T.badgeColor}; padding:3px 8px; border-radius:6px; }
+        .settings-badge-soon { font-size:10px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; background:${T.badgeSoonBg}; color:${T.badgeSoonColor}; padding:3px 8px; border-radius:6px; }
 
         /* ── Mobile full-screen override ── */
         @media (max-width: 480px) {
@@ -1218,7 +1218,7 @@ export default function BaseballPomodoro() {
           .timer-ring { width:270px !important; height:270px !important; flex-shrink:0; }
           .timer-ring svg { width:270px !important; height:270px !important; }
           .timer-inner { width:270px !important; height:270px !important; }
-          .timer-digits { font-size:90px !important; }
+          .timer-digits { font-size:82px !important; }
           .floating-chip-wrap { border-radius:0 !important; }
           .stat-announce { display:none !important; }
           .btn-stack { flex:0 0 auto; padding:10px 0 16px !important; gap:10px; width:100%; }
